@@ -111,7 +111,7 @@ func (cmd CreateSpaceQuota) Run(context *cli.Context) {
 	err = cmd.quotaRepo.Create(quota)
 
 	httpErr, ok := err.(errors.HttpError)
-	if ok && httpErr.ErrorCode() == errors.QUOTA_EXISTS {
+	if ok && httpErr.ErrorCode() == errors.SPACE_QUOTA_EXISTS {
 		cmd.ui.Ok()
 		cmd.ui.Warn(T("Space Quota Definition {{.QuotaName}} already exists", map[string]interface{}{"QuotaName": quota.Name}))
 		return

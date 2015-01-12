@@ -9,6 +9,7 @@ const (
 	ORG_EXISTS                  = "30002"
 	SPACE_EXISTS                = "40002"
 	QUOTA_EXISTS                = "240002"
+	SPACE_QUOTA_EXISTS          = "310002"
 	SERVICE_INSTANCE_NAME_TAKEN = "60002"
 	APP_NOT_STAGED              = "170002"
 	APP_STOPPED                 = "220001"
