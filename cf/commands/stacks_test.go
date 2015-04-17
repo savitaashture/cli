@@ -36,6 +36,12 @@ var _ = Describe("stacks command", func() {
 
 			Expect(testcmd.RunCommand(cmd, []string{}, requirementsFactory)).To(BeFalse())
 		})
+
+		It("should fail with usage when provided any arguments", func() {
+			requirementsFactory.LoginSuccess = true
+			Expect(testcmd.RunCommand(cmd, []string{"etcetc"}, requirementsFactory)).To(BeFalse())
+			Expect(ui.FailedWithUsage).To(BeTrue())
+		})
 	})
 
 	It("lists the stacks", func() {
