@@ -41,6 +41,10 @@ var _ = Describe("stacks command", func() {
 			requirementsFactory.LoginSuccess = true
 			Expect(testcmd.RunCommand(cmd, []string{"etcetc"}, requirementsFactory)).To(BeFalse())
 			Expect(ui.FailedWithUsage).To(BeTrue())
+			Expect(ui.Outputs).To(ContainSubstrings(
+				[]string{"FAILED"},
+				[]string{"Incorrect Usage."},
+			))
 		})
 	})
 

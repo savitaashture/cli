@@ -2736,12 +2736,12 @@
    },
    {
       "id": "Show information for a stack (a stack is a pre-built file system, including an operating system, that can run apps)",
-      "translation": "Show information for a stack (a stack is a pre-built file system, including an operating system, that can run apps)",
+      "translation": "Montrez information pour un stack (un stack est un system de fichier pré-construit qui inclus un system d'exploitation qui peut executer des logiciels)",
       "modified": false
    },
    {
       "id": "List all the routes for all spaces of current organization",
-      "translation": "List all the routes for all spaces of current organization",
+      "translation": "Lister toutes les routes pour tous les espaces de l'organization courrant",
       "modified": false
    },
    {
