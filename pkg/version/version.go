@@ -23,6 +23,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// NOTE: use go build -ldflags "-X github.com/tektoncd/cli/pkg/version.defaultNamespace=tekton-pipelines"
+var defaultNamespace = "tekton-pipelines"
+
 const (
 	pipelinesControllerSelector    string = "app.kubernetes.io/part-of=tekton-pipelines,app.kubernetes.io/component=controller,app.kubernetes.io/name=controller"
 	oldPipelinesControllerSelector string = "app.kubernetes.io/component=controller,app.kubernetes.io/name=tekton-pipelines"
@@ -31,8 +34,8 @@ const (
 )
 
 // GetPipelineVersion Get pipeline version, functions imported from Dashboard
-func GetPipelineVersion(c *cli.Clients) (string, error) {
-	deploymentsList, err := getDeployments(c, pipelinesControllerSelector, oldPipelinesControllerSelector)
+func GetPipelineVersion(c *cli.Clients, ns string) (string, error) {
+	deploymentsList, err := getDeployments(c, pipelinesControllerSelector, oldPipelinesControllerSelector, ns)
 
 	if err != nil {
 		return "", err
@@ -48,8 +51,14 @@ func GetPipelineVersion(c *cli.Clients) (string, error) {
 }
 
 // Get deployments for either Tekton Triggers, Tekton Dashboard or Tekton Pipelines
-func getDeployments(c *cli.Clients, newLabel, oldLabel string) (*v1.DeploymentList, error) {
-	deployments, err := c.Kube.AppsV1().Deployments("").List(metav1.ListOptions{LabelSelector: newLabel})
+func getDeployments(c *cli.Clients, newLabel, oldLabel, ns string) (*v1.DeploymentList, error) {
+	namespace := defaultNamespace
+	if ns != "" {
+		// If user provide namespace via flag then override defaultNamespace with provided namespace
+		namespace = ns
+	}
+
+	deployments, err := c.Kube.AppsV1().Deployments(namespace).List(metav1.ListOptions{LabelSelector: newLabel})
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +66,7 @@ func getDeployments(c *cli.Clients, newLabel, oldLabel string) (*v1.DeploymentLi
 	// NOTE: If the new labels selector returned nothing, try with old labels selector
 	// The old labels selectors are deprecated and should be removed at some point
 	if deployments == nil || len(deployments.Items) == 0 {
-		deployments, err = c.Kube.AppsV1().Deployments("").List(metav1.ListOptions{LabelSelector: oldLabel})
+		deployments, err = c.Kube.AppsV1().Deployments(namespace).List(metav1.ListOptions{LabelSelector: oldLabel})
 		if err != nil {
 			return nil, err
 		}
@@ -101,8 +110,8 @@ func findPipelineVersion(deployments []v1.Deployment) string {
 }
 
 // GetTriggerVersion Get triggers version.
-func GetTriggerVersion(c *cli.Clients) (string, error) {
-	deploymentsList, err := getDeployments(c, triggersControllerSelector, oldTriggersControllerSelector)
+func GetTriggerVersion(c *cli.Clients, ns string) (string, error) {
+	deploymentsList, err := getDeployments(c, triggersControllerSelector, oldTriggersControllerSelector, ns)
 
 	if err != nil {
 		return "", err

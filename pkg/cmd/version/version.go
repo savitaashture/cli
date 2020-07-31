@@ -30,21 +30,22 @@ import (
 	"github.com/tektoncd/cli/pkg/version"
 )
 
-// NOTE: use go build -ldflags "-X github.com/tektoncd/cli/pkg/cmd/version.clientVersion=$(git describe)"
-var clientVersion = devVersion
-
-// flag to skip check flag in version cmd
-var skipCheckFlag = "false"
-
 const (
 	devVersion       = "dev"
 	latestReleaseURL = "https://api.github.com/repos/tektoncd/cli/releases/latest"
 )
 
+var (
+	// NOTE: use go build -ldflags "-X github.com/tektoncd/cli/pkg/cmd/version.clientVersion=$(git describe)"
+	clientVersion = devVersion
+	// flag to skip check flag in version cmd
+	skipCheckFlag = "false"
+	namespace     string
+)
+
 // Command returns version command
 func Command(p cli.Params) *cobra.Command {
 	var check bool
-
 	var cmd = &cobra.Command{
 		Use:   "version",
 		Short: "Prints version information",
@@ -56,14 +57,17 @@ func Command(p cli.Params) *cobra.Command {
 
 			cs, err := p.Clients()
 			if err == nil {
-				pipelineVersion, _ := version.GetPipelineVersion(cs)
+				pipelineVersion, _ := version.GetPipelineVersion(cs, namespace)
 				if pipelineVersion == "" {
-					pipelineVersion = "unknown"
+					pipelineVersion = "unknown, " +
+						"pipeline controller may be installed in another namespace please use tkn version -n {namespace}"
 				}
+
 				fmt.Fprintf(cmd.OutOrStdout(), "Pipeline version: %s\n", pipelineVersion)
-				triggersVersion, _ := version.GetTriggerVersion(cs)
+				triggersVersion, _ := version.GetTriggerVersion(cs, namespace)
 				if triggersVersion == "" {
-					triggersVersion = "unknown"
+					triggersVersion = "unknown, " +
+						"triggers controller may be installed in another namespace please use tkn version -n {namespace}"
 				}
 				fmt.Fprintf(cmd.OutOrStdout(), "Triggers version: %s\n", triggersVersion)
 			}
@@ -78,6 +82,9 @@ func Command(p cli.Params) *cobra.Command {
 			return err
 		},
 	}
+
+	cmd.Flags().StringVarP(&namespace, "namespace", "n", "",
+		"namespace to check installed controller version")
 
 	if skipCheckFlag != "true" {
 		cmd.Flags().BoolVarP(&check, "check", "c", false, "check if a newer version is available")
